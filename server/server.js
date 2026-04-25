@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
+const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const initSocket = require('./sockets');
@@ -8,7 +9,7 @@ const cron = require('node-cron');
 const { generateVirtualMatches, processVirtualMatches, ensureUpcomingMatches } = require('./services/oddsService');
 const { settleCompletedBets } = require('./services/betSettlement');
 
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const server = http.createServer(app);
@@ -39,7 +40,6 @@ app.get('/api/health', (req, res) => {
 
 // Production: serve React frontend
 if (process.env.NODE_ENV === 'production') {
-  const path = require('path');
   app.use(express.static(path.join(__dirname, '../client/dist')));
   // SPA catch-all — must be after all API routes
   app.get('*', (req, res) => {
