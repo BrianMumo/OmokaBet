@@ -1,0 +1,77 @@
+.mybets-page { max-width: 800px; margin: 0 auto; }
+.mybets-title { font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; margin-bottom: var(--space-5); }
+
+.bets-list { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.bet-card {
+  background: var(--bg-card-flat);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  transition: all var(--t-base) var(--ease-out);
+  position: relative;
+}
+.bet-card:hover { border-color: var(--border-hover); }
+.bet-card.status-won { border-color: rgba(16, 185, 129, 0.2); }
+.bet-card.status-won::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green-500), transparent);
+  opacity: 0.5;
+}
+.bet-card.status-lost { border-color: rgba(239, 68, 68, 0.12); }
+
+.bet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); flex-wrap: wrap; gap: var(--space-2); }
+.bet-header > div { display: flex; align-items: center; gap: var(--space-2); }
+.bet-code { font-family: var(--font-display); font-size: var(--fs-base); font-weight: 700; color: var(--text-primary); }
+.bet-date { font-size: var(--fs-xs); color: var(--text-tertiary); }
+
+.bet-selections { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--space-3); }
+.bet-selection {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); gap: 8px;
+  flex-wrap: wrap;
+}
+.sel-teams { font-size: var(--fs-xs); color: var(--text-tertiary); flex: 1; min-width: 0; }
+.sel-pick { display: flex; align-items: center; gap: 8px; }
+.sel-outcome { font-size: var(--fs-sm); font-weight: 600; color: var(--text-primary); }
+.sel-odds { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--gold-500); }
+.sel-result { font-size: var(--fs-sm); }
+
+.bet-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.bet-amounts { display: flex; gap: var(--space-5); font-size: var(--fs-sm); color: var(--text-secondary); flex-wrap: wrap; }
+
+/* ======================== MOBILE ======================== */
+@media (max-width: 768px) {
+  .mybets-title { font-size: var(--fs-xl); margin-bottom: var(--space-4); }
+
+  .bet-card { padding: var(--space-4); }
+
+  .bet-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .bet-selection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 8px 10px;
+  }
+  .sel-teams { font-size: var(--fs-2xs); }
+
+  .bet-amounts {
+    gap: var(--space-3);
+    font-size: var(--fs-xs);
+    width: 100%;
+  }
+  .bet-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+  .bet-footer .btn { width: 100%; justify-content: center; }
+}

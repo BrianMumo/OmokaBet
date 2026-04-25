@@ -1,0 +1,178 @@
+.match-card {
+  background: var(--bg-card-flat);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  transition: all var(--t-base) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle inner glow on top edge */
+.match-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.06), transparent);
+  pointer-events: none;
+}
+
+.match-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-3px);
+}
+
+.match-card.live {
+  border-color: rgba(239, 68, 68, 0.12);
+}
+.match-card.live::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red-500), transparent);
+  opacity: 0.5;
+}
+
+/* Header */
+.match-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.match-league {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.match-time {
+  font-size: var(--fs-2xs);
+  color: var(--text-tertiary);
+  font-weight: 500;
+  padding: 3px 10px;
+  background: rgba(148, 163, 184, 0.04);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Teams */
+.match-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.team-name {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.team-score {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  min-width: 28px;
+  text-align: center;
+}
+
+/* Odds Row */
+.match-odds {
+  display: flex;
+  gap: 8px;
+}
+.match-odds .odds-btn {
+  flex: 1;
+}
+
+/* Locked — betting closed */
+.match-odds.locked {
+  justify-content: center;
+}
+.odds-locked-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  color: var(--text-tertiary);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(148, 163, 184, 0.03);
+  border: 1px dashed rgba(148, 163, 184, 0.1);
+  border-radius: var(--radius-md);
+  opacity: 0.7;
+}
+
+/* Compact */
+.match-card.compact {
+  padding: 14px 16px;
+}
+.match-card.compact .match-header { margin-bottom: 10px; }
+.match-card.compact .match-teams { margin-bottom: 12px; }
+.match-card.compact .team-name { font-size: var(--fs-sm); }
+.match-card.compact .odds-btn { padding: 8px 10px; min-width: 60px; }
+.match-card.compact .odds-value { font-size: var(--fs-sm); }
+
+/* ======================== MOBILE ======================== */
+@media (max-width: 768px) {
+  .match-card {
+    padding: 14px 14px;
+    border-radius: var(--radius-md);
+  }
+  .match-card:hover {
+    transform: none; /* No hover lift on touch */
+    box-shadow: none;
+  }
+  .match-card:active {
+    background: var(--bg-card-hover);
+  }
+  .match-header { margin-bottom: 10px; }
+  .match-teams { gap: 8px; margin-bottom: 12px; }
+  .team-name { font-size: var(--fs-sm); }
+
+  /* Larger touch targets for odds buttons */
+  .match-odds { gap: 6px; }
+  .match-odds .odds-btn {
+    padding: 12px 8px;
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .match-odds .odds-btn:hover {
+    transform: none;
+  }
+  .match-odds .odds-btn:active {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--green-500);
+  }
+
+  .match-card.compact { padding: 12px; }
+  .match-card.compact .odds-btn {
+    padding: 10px 6px;
+    min-height: 48px;
+  }
+}

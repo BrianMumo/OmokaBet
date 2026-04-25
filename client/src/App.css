@@ -1,0 +1,39 @@
+/* App-level layout */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 64px;
+  position: relative;
+}
+
+.page-content {
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+@media (max-width: 1024px) {
+  .page-content {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content { padding-top: 52px; }
+  .page-content {
+    padding: var(--space-3);
+    padding-bottom: calc(60px + var(--space-6));
+  }
+}
+
+@media (max-width: 480px) {
+  .page-content {
+    padding: var(--space-2);
+    padding-bottom: calc(60px + var(--space-4));
+  }
+}
