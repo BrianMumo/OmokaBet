@@ -64,14 +64,15 @@ async function settleCompletedBets() {
       } else if (allWon) {
         bet.status = 'won';
 
-        // Credit winnings
-        const user = await User.findById(bet.userId);
+        // Credit winnings atomically
+        const user = await User.findOneAndUpdate(
+          { _id: bet.userId },
+          { $inc: { balance: bet.potentialWin, totalWins: 1, totalWon: bet.potentialWin } },
+          { new: true }
+        );
+
         if (user) {
-          const balanceBefore = user.balance;
-          user.balance += bet.potentialWin;
-          user.totalWins += 1;
-          user.totalWon += bet.potentialWin;
-          await user.save();
+          const balanceBefore = user.balance - bet.potentialWin;
 
           await Transaction.create({
             userId: user._id,

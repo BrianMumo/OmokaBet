@@ -29,10 +29,26 @@ router.post('/', protect, async (req, res) => {
       return res.status(400).json({ message: `Maximum ${MAX_SELECTIONS} selections allowed` });
     }
 
-    // Check balance
-    const user = await User.findById(req.user._id);
-    if (user.balance < stake) {
-      return res.status(400).json({ message: 'Insufficient balance' });
+    // Check for duplicate bets on the same event outcome
+    const eventIds = selections.map(s => s.eventId);
+    const existingBets = await Bet.find({
+      userId: req.user._id,
+      status: 'pending',
+      'selections.eventId': { $in: eventIds },
+    });
+
+    for (const sel of selections) {
+      const dup = existingBets.find(b =>
+        b.selections.some(s =>
+          s.eventId.toString() === sel.eventId &&
+          s.outcomeName === sel.outcomeName
+        )
+      );
+      if (dup) {
+        return res.status(400).json({
+          message: `You already have a pending bet on this outcome (${sel.outcomeName}). Bet code: ${dup.betCode}`,
+        });
+      }
     }
 
     // Validate all events exist and odds are still valid
@@ -70,12 +86,18 @@ router.post('/', protect, async (req, res) => {
       });
     }
 
-    // Deduct balance atomically
-    const balanceBefore = user.balance;
-    user.balance -= stake;
-    user.totalBets += 1;
-    user.totalWagered += stake;
-    await user.save();
+    // Deduct balance atomically — prevents race conditions / overdraw
+    const user = await User.findOneAndUpdate(
+      { _id: req.user._id, balance: { $gte: stake } },
+      { $inc: { balance: -stake, totalBets: 1, totalWagered: stake } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(400).json({ message: 'Insufficient balance' });
+    }
+
+    const balanceBefore = user.balance + stake; // reverse-calc for transaction log
 
     // Create bet
     const bet = await Bet.create({

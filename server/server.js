@@ -24,11 +24,15 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Rate limiting
+const { authLimiter, betLimiter, walletLimiter, apiLimiter } = require('./middleware/rateLimiter');
+app.use('/api/', apiLimiter);
+
 // Routes
-app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/events', require('./routes/events'));
-app.use('/api/bets', require('./routes/bets'));
-app.use('/api/wallet', require('./routes/wallet'));
+app.use('/api/bets', betLimiter, require('./routes/bets'));
+app.use('/api/wallet', walletLimiter, require('./routes/wallet'));
 app.use('/api/mpesa', require('./routes/mpesa'));
 app.use('/api/sports', require('./routes/sports'));
 app.use('/api/admin', require('./routes/admin'));

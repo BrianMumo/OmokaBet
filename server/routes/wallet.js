@@ -99,25 +99,28 @@ router.post('/withdraw', protect, async (req, res) => {
       return res.status(400).json({ message: `Maximum withdrawal is KES ${MAX_WITHDRAWAL.toLocaleString()}` });
     }
 
-    const user = await User.findById(req.user._id);
-    if (user.balance < withdrawAmount) {
+    const targetPhone = phone || req.user.phone;
+
+    // Deduct balance atomically — prevents race conditions / overdraw
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: req.user._id, balance: { $gte: withdrawAmount } },
+      { $inc: { balance: -withdrawAmount } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
       return res.status(400).json({ message: 'Insufficient balance' });
     }
 
-    const targetPhone = phone || user.phone;
-
-    // Deduct balance first
-    const balanceBefore = user.balance;
-    user.balance -= withdrawAmount;
-    await user.save();
+    const balanceBefore = updatedUser.balance + withdrawAmount;
 
     // Record pending transaction
     const transaction = await Transaction.create({
-      userId: user._id,
+      userId: updatedUser._id,
       type: 'withdrawal',
       amount: -withdrawAmount,
       balanceBefore,
-      balanceAfter: user.balance,
+      balanceAfter: updatedUser.balance,
       phone: targetPhone,
       reference: `WDR-${Date.now()}`,
       description: `Withdrawal to ${targetPhone}`,
@@ -143,9 +146,8 @@ router.post('/withdraw', protect, async (req, res) => {
         transaction.status = 'completed';
         await transaction.save();
       } else {
-        // Refund balance on failure
-        user.balance += withdrawAmount;
-        await user.save();
+        // Refund balance atomically on failure
+        await User.findByIdAndUpdate(req.user._id, { $inc: { balance: withdrawAmount } });
         transaction.status = 'failed';
         await transaction.save();
         return res.status(500).json({ message: 'Withdrawal failed. Balance has been refunded.' });
@@ -155,12 +157,14 @@ router.post('/withdraw', protect, async (req, res) => {
     // Emit balance update
     const io = req.app.get('io');
     if (io) {
-      io.to(`user:${user._id}`).emit('wallet:updated', { balance: user.balance });
+      const freshUser = await User.findById(req.user._id);
+      io.to(`user:${req.user._id}`).emit('wallet:updated', { balance: freshUser.balance });
     }
 
+    const finalUser = await User.findById(req.user._id);
     res.json({
       message: 'Withdrawal processed successfully',
-      balance: user.balance,
+      balance: finalUser.balance,
       amount: withdrawAmount,
     });
   } catch (error) {
