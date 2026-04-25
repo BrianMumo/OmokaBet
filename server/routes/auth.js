@@ -7,7 +7,7 @@ const { protect } = require('../middleware/auth');
 // @desc    Register a new user
 router.post('/register', async (req, res) => {
   try {
-    const { phone, password } = req.body;
+    const { phone, password, referralCode } = req.body;
 
     // Validate required fields
     if (!phone || !password) {
@@ -25,11 +25,23 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Phone number already registered' });
     }
 
+    // Validate referral code if provided
+    let validReferral = null;
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+      if (referrer) {
+        validReferral = referralCode.toUpperCase();
+      }
+    }
+
     // Auto-generate username from phone
     const username = 'user_' + normalizedPhone.slice(-6);
     const email = normalizedPhone.replace('+', '') + '@omokabet.local';
 
-    const user = await User.create({ username, email, phone: normalizedPhone, password });
+    const user = await User.create({
+      username, email, phone: normalizedPhone, password,
+      referredBy: validReferral,
+    });
     const token = user.generateToken();
 
     res.status(201).json({
@@ -41,6 +53,7 @@ router.post('/register', async (req, res) => {
         phone: user.phone,
         balance: user.balance,
         role: user.role,
+        referralCode: user.referralCode,
       },
     });
   } catch (error) {
@@ -95,6 +108,7 @@ router.post('/login', async (req, res) => {
         role: user.role,
         totalBets: user.totalBets,
         totalWins: user.totalWins,
+        referralCode: user.referralCode,
       },
     });
   } catch (error) {
@@ -118,6 +132,7 @@ router.get('/me', protect, async (req, res) => {
       totalWins: req.user.totalWins,
       totalWagered: req.user.totalWagered,
       totalWon: req.user.totalWon,
+      referralCode: req.user.referralCode,
       createdAt: req.user.createdAt,
     },
   });

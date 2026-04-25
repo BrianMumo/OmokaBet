@@ -1,15 +1,24 @@
+import { useState } from 'react';
 import { useBetSlip } from '../context/BetSlipContext';
 import './MatchCard.css';
 
+const MARKET_LABELS = {
+  h2h: '1X2',
+  totals: 'O/U 2.5',
+  btts: 'GG/NG',
+};
+
 export default function MatchCard({ event, compact = false }) {
   const { addSelection, isSelected } = useBetSlip();
+  const [activeMarket, setActiveMarket] = useState('h2h');
 
   if (!event) return null;
 
-  const h2hMarket = event.markets?.find(m => m.key === 'h2h');
-  const outcomes = h2hMarket?.outcomes || [];
+  const availableMarkets = event.markets?.map(m => m.key) || ['h2h'];
+  const currentMarket = event.markets?.find(m => m.key === activeMarket) || event.markets?.[0];
+  const outcomes = currentMarket?.outcomes || [];
   const isLive = event.status === 'live';
-  const isLocked = event.status !== 'upcoming'; // Only upcoming accepts bets
+  const isLocked = event.status === 'completed';
 
   const formatTime = (dateStr) => {
     const date = new Date(dateStr);
@@ -25,12 +34,12 @@ export default function MatchCard({ event, compact = false }) {
   };
 
   const handleOddsClick = (outcome) => {
-    if (isLocked) return; // Prevent clicks on live/completed
+    if (isLocked) return;
     addSelection({
       eventId: event._id,
       homeTeam: event.homeTeam,
       awayTeam: event.awayTeam,
-      market: 'h2h',
+      market: activeMarket,
       outcomeName: outcome.name,
       odds: outcome.price,
       sportKey: event.sportKey,
@@ -38,8 +47,10 @@ export default function MatchCard({ event, compact = false }) {
     });
   };
 
-  // Determine labels: 1, X, 2 for football; 1, 2 for others
-  const getLabel = (index, total) => {
+  // Determine labels: 1, X, 2 for football h2h; 1, 2 for others
+  const getLabel = (index, total, marketKey) => {
+    if (marketKey === 'totals') return ['O 2.5', 'U 2.5'][index];
+    if (marketKey === 'btts') return ['GG', 'NG'][index];
     if (total === 3) return ['1', 'X', '2'][index];
     return ['1', '2'][index];
   };
@@ -70,7 +81,22 @@ export default function MatchCard({ event, compact = false }) {
         </div>
       </div>
 
-      {/* Odds — locked when live or completed */}
+      {/* Market Tabs — only show if multiple markets */}
+      {availableMarkets.length > 1 && (
+        <div className="market-tabs">
+          {availableMarkets.map(key => (
+            <button
+              key={key}
+              className={`market-tab ${activeMarket === key ? 'active' : ''}`}
+              onClick={() => setActiveMarket(key)}
+            >
+              {MARKET_LABELS[key] || key}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Odds — locked when completed */}
       {outcomes.length > 0 && (
         <div className={`match-odds ${isLocked ? 'locked' : ''}`}>
           {isLocked ? (
@@ -86,7 +112,7 @@ export default function MatchCard({ event, compact = false }) {
                 onClick={() => handleOddsClick(outcome)}
                 id={`odds-${event._id}-${outcome.name}`}
               >
-                <span className="odds-label">{getLabel(idx, outcomes.length)}</span>
+                <span className="odds-label">{getLabel(idx, outcomes.length, activeMarket)}</span>
                 <span className="odds-value">{outcome.price.toFixed(2)}</span>
               </button>
             ))

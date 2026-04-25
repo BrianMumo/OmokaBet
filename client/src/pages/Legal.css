@@ -1,0 +1,159 @@
+.legal-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+.legal-card {
+  background: var(--bg-card-flat);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: 32px 28px;
+}
+.legal-card h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.legal-updated {
+  font-size: var(--fs-sm);
+  color: var(--text-tertiary);
+  margin-bottom: 28px;
+}
+
+.legal-card section {
+  margin-bottom: 28px;
+}
+.legal-card h2 {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.legal-card p {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.legal-card ul {
+  list-style: none;
+  padding: 0;
+}
+.legal-card li {
+  position: relative;
+  padding-left: 20px;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.legal-card li::before {
+  content: '•';
+  position: absolute;
+  left: 4px;
+  color: var(--green-500);
+  font-weight: bold;
+}
+.legal-card a {
+  color: var(--green-400);
+  text-decoration: none;
+}
+.legal-card a:hover {
+  text-decoration: underline;
+}
+
+.legal-nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-default);
+}
+
+/* Responsible Gambling specifics */
+.rg-alert {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 28px;
+}
+.rg-alert strong {
+  display: block;
+  font-size: var(--fs-base);
+  color: #f59e0b;
+  margin-bottom: 4px;
+}
+.rg-alert p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.rg-tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.rg-tool-card {
+  background: rgba(148, 163, 184, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+}
+.rg-tool-icon {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 8px;
+}
+.rg-tool-card h3 {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.rg-tool-card p {
+  font-size: var(--fs-xs);
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.rg-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+.rg-contact {
+  background: rgba(148, 163, 184, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+.rg-contact strong {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.rg-contact p {
+  font-size: var(--fs-xs);
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .legal-card {
+    padding: 20px 16px;
+    border-radius: var(--radius-lg);
+  }
+  .rg-tools {
+    grid-template-columns: 1fr;
+  }
+}

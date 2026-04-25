@@ -1,12 +1,16 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { authAPI, walletAPI } from '../services/api';
+import { io } from 'socket.io-client';
 
 const AuthContext = createContext(null);
+
+const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('omokabet_token'));
   const [loading, setLoading] = useState(true);
+  const socketRef = useRef(null);
 
   // Load user on mount
   useEffect(() => {
@@ -16,6 +20,28 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   }, []);
+
+  // Socket.IO: join user room and listen for wallet updates
+  useEffect(() => {
+    if (user && user.id) {
+      if (!socketRef.current) {
+        socketRef.current = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+      }
+      socketRef.current.emit('join', user.id);
+      socketRef.current.on('wallet:updated', (data) => {
+        if (data.balance !== undefined) {
+          setUser(prev => prev ? { ...prev, balance: data.balance } : null);
+        }
+      });
+    }
+
+    return () => {
+      if (socketRef.current && user?.id) {
+        socketRef.current.emit('leave', user.id);
+        socketRef.current.off('wallet:updated');
+      }
+    };
+  }, [user?.id]);
 
   const loadUser = async () => {
     try {

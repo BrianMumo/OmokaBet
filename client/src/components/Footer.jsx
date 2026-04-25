@@ -16,17 +16,18 @@ export default function Footer() {
             <Link to="/sports">Sports</Link>
             <Link to="/live">Live Betting</Link>
             <Link to="/my-bets">My Bets</Link>
+            <Link to="/transactions">Transactions</Link>
           </div>
           <div className="footer-col">
-            <h4>Support</h4>
-            <a href="#">Help Center</a>
-            <a href="#">Terms & Conditions</a>
-            <a href="#">Responsible Gambling</a>
+            <h4>Legal</h4>
+            <Link to="/terms">Terms & Conditions</Link>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/responsible-gambling">Responsible Gambling</Link>
           </div>
           <div className="footer-col">
             <h4>Contact</h4>
-            <a href="#">support@omokabet.com</a>
-            <a href="#">+254 700 000 000</a>
+            <a href="mailto:support@omokabet.ke">support@omokabet.ke</a>
+            <a href="tel:+254700000000">+254 700 000 000</a>
           </div>
         </div>
       </div>

@@ -58,8 +58,8 @@ router.post('/', protect, async (req, res) => {
       if (!event) {
         return res.status(400).json({ message: `Event not found: ${sel.eventId}` });
       }
-      if (event.status !== 'upcoming') {
-        return res.status(400).json({ message: `Betting closed for ${event.homeTeam} vs ${event.awayTeam} — match already started` });
+      if (!['upcoming', 'live'].includes(event.status)) {
+        return res.status(400).json({ message: `Betting closed for ${event.homeTeam} vs ${event.awayTeam}` });
       }
 
       // Find the market and verify odds

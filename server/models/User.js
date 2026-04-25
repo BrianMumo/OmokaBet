@@ -62,6 +62,15 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  referralCode: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  referredBy: {
+    type: String,
+    default: null,
+  },
 }, {
   timestamps: true,
 });
@@ -92,6 +101,10 @@ userSchema.methods.generateToken = function () {
 userSchema.pre('save', function (next) {
   if (this.isModified('phone') && this.phone.startsWith('0')) {
     this.phone = '+254' + this.phone.substring(1);
+  }
+  // Auto-generate referral code on creation
+  if (!this.referralCode) {
+    this.referralCode = 'OMK' + Math.random().toString(36).substring(2, 7).toUpperCase();
   }
   next();
 });

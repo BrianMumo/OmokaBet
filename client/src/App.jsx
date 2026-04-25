@@ -11,6 +11,10 @@ import Sports from './pages/Sports';
 import LiveBetting from './pages/LiveBetting';
 import MyBets from './pages/MyBets';
 import Auth from './pages/Auth';
+import Transactions from './pages/Transactions';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import ResponsibleGambling from './pages/ResponsibleGambling';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
@@ -69,7 +73,11 @@ function App() {
                           <Route path="/sports/:sportKey" element={<Sports />} />
                           <Route path="/live" element={<LiveBetting />} />
                           <Route path="/my-bets" element={<MyBets />} />
+                          <Route path="/transactions" element={<Transactions />} />
                           <Route path="/auth" element={<Auth />} />
+                          <Route path="/terms" element={<Terms />} />
+                          <Route path="/privacy" element={<Privacy />} />
+                          <Route path="/responsible-gambling" element={<ResponsibleGambling />} />
                         </Routes>
                       </div>
                       <BetSlip />

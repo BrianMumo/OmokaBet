@@ -355,6 +355,41 @@ async function generateVirtualMatches() {
 
       const externalId = `virt_${sport.key}_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`;
 
+      // Build markets array
+      const markets = [{ key: 'h2h', lastUpdate: new Date(), outcomes }];
+
+      // Additional markets for Football
+      if (isFootball) {
+        const totalGoals = score.home + score.away;
+
+        // Over/Under 2.5
+        const overProb = totalGoals > 2.5 ? 0.55 + Math.random() * 0.1 : 0.35 + Math.random() * 0.1;
+        const underProb = 1 - overProb;
+        const toOddsOU = (p) => Math.round(Math.max((1 / Math.max(p, 0.1)) * (1 - HOUSE_EDGE), 1.10) * 100) / 100;
+        markets.push({
+          key: 'totals',
+          lastUpdate: new Date(),
+          outcomes: [
+            { name: 'Over 2.5', price: toOddsOU(overProb) },
+            { name: 'Under 2.5', price: toOddsOU(underProb) },
+          ],
+        });
+
+        // GG/NG (Both Teams To Score)
+        const bothScore = score.home > 0 && score.away > 0;
+        const ggProb = bothScore ? 0.55 + Math.random() * 0.08 : 0.35 + Math.random() * 0.1;
+        const ngProb = 1 - ggProb;
+        const toOddsGG = (p) => Math.round(Math.max((1 / Math.max(p, 0.1)) * (1 - HOUSE_EDGE), 1.10) * 100) / 100;
+        markets.push({
+          key: 'btts',
+          lastUpdate: new Date(),
+          outcomes: [
+            { name: 'GG', price: toOddsGG(ggProb) },
+            { name: 'NG', price: toOddsGG(ngProb) },
+          ],
+        });
+      }
+
       await Event.create({
         externalId,
         sportKey: sport.key,
@@ -369,7 +404,7 @@ async function generateVirtualMatches() {
         predeterminedHome: score.home,
         predeterminedAway: score.away,
         matchDuration,
-        markets: [{ key: 'h2h', lastUpdate: new Date(), outcomes }],
+        markets,
         bookmaker: 'OmokaBet Virtual',
         lastOddsUpdate: new Date(),
       });

@@ -7,7 +7,10 @@ import './Auth.css';
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState(searchParams.get('mode') === 'register' ? 'register' : 'login');
-  const [form, setForm] = useState({ phone: '', password: '', identifier: '' });
+  const [form, setForm] = useState({
+    phone: '', password: '', identifier: '',
+    referralCode: searchParams.get('ref') || '',
+  });
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
   const toast = useToast();
@@ -23,7 +26,7 @@ export default function Auth() {
         await login(form.identifier, form.password);
         toast.success('Welcome back!');
       } else {
-        await register({ phone: form.phone, password: form.password });
+        await register({ phone: form.phone, password: form.password, referralCode: form.referralCode });
         toast.success('Account created! Welcome to OmokaBet 🎰');
       }
       navigate('/');
@@ -58,6 +61,10 @@ export default function Auth() {
               <div className="form-group">
                 <label className="form-label">Password</label>
                 <input type="password" name="password" className="form-input" placeholder="At least 6 characters" value={form.password} onChange={handleChange} required minLength={6} id="reg-password" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Referral Code <span className="text-muted" style={{fontWeight:400, fontSize:'0.8em'}}>(optional)</span></label>
+                <input type="text" name="referralCode" className="form-input" placeholder="e.g. OMKAB1CD" value={form.referralCode} onChange={handleChange} id="reg-referral" />
               </div>
             </>
           ) : (

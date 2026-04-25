@@ -58,18 +58,22 @@ router.post('/stk-callback', async (req, res) => {
       return res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
     }
 
-    // Credit user balance
-    const balanceBefore = user.balance;
-    user.balance += parseFloat(amount);
-    await user.save();
+    // Credit user balance atomically
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id },
+      { $inc: { balance: parseFloat(amount) } },
+      { new: true }
+    );
+
+    const balanceBefore = updatedUser.balance - parseFloat(amount);
 
     // Record transaction
     await Transaction.create({
-      userId: user._id,
+      userId: updatedUser._id,
       type: 'deposit',
       amount: parseFloat(amount),
       balanceBefore,
-      balanceAfter: user.balance,
+      balanceAfter: updatedUser.balance,
       reference: `MPESA-${mpesaReceipt}`,
       mpesaReceiptNumber: mpesaReceipt,
       phone: normalizedPhone,
@@ -77,7 +81,43 @@ router.post('/stk-callback', async (req, res) => {
       status: 'completed',
     });
 
-    console.log(`[M-PESA] Deposit successful: KES ${amount} for ${user.username}`);
+    // Emit real-time balance update to frontend via Socket.IO
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user:${updatedUser._id}`).emit('wallet:updated', {
+        balance: updatedUser.balance,
+        deposit: parseFloat(amount),
+        receipt: mpesaReceipt,
+      });
+    }
+
+    // Credit referrer on first deposit
+    if (updatedUser.referredBy && balanceBefore === 0) {
+      const referralBonus = 50; // KES 50 referral bonus
+      const referrer = await User.findOneAndUpdate(
+        { referralCode: updatedUser.referredBy },
+        { $inc: { balance: referralBonus } },
+        { new: true }
+      );
+      if (referrer) {
+        await Transaction.create({
+          userId: referrer._id,
+          type: 'bonus',
+          amount: referralBonus,
+          balanceBefore: referrer.balance - referralBonus,
+          balanceAfter: referrer.balance,
+          reference: `REF-${updatedUser._id.toString().slice(-6).toUpperCase()}`,
+          description: `Referral bonus — ${updatedUser.username} made first deposit`,
+          status: 'completed',
+        });
+        if (io) {
+          io.to(`user:${referrer._id}`).emit('wallet:updated', { balance: referrer.balance });
+        }
+        console.log(`[REFERRAL] Credited KES ${referralBonus} to ${referrer.username}`);
+      }
+    }
+
+    console.log(`[M-PESA] Deposit successful: KES ${amount} for ${updatedUser.username}`);
 
     res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
   } catch (error) {

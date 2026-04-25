@@ -138,7 +138,29 @@ function determineOutcome(event, selection) {
     return selection.outcomeName === winner ? 'won' : 'lost';
   }
 
-  // For other markets (spreads, totals), simplified logic
+  // Over/Under 2.5
+  if (selection.market === 'totals') {
+    const totalGoals = event.homeScore + event.awayScore;
+    if (selection.outcomeName === 'Over 2.5') {
+      return totalGoals > 2.5 ? 'won' : 'lost';
+    }
+    if (selection.outcomeName === 'Under 2.5') {
+      return totalGoals < 2.5 ? 'won' : 'lost';
+    }
+  }
+
+  // Both Teams To Score (GG/NG)
+  if (selection.market === 'btts') {
+    const bothScored = event.homeScore > 0 && event.awayScore > 0;
+    if (selection.outcomeName === 'GG') {
+      return bothScored ? 'won' : 'lost';
+    }
+    if (selection.outcomeName === 'NG') {
+      return !bothScored ? 'won' : 'lost';
+    }
+  }
+
+  // Unknown market — void
   return 'void';
 }
 
